@@ -290,13 +290,17 @@ h1,h2,h3{font-family:var(--display);color:var(--forest);font-weight:600;line-hei
 
 /* ---- phones: chapter cards always fully on screen ---- */
 @media (max-width:767px){
-  .ch-card{width:calc(100vw - 44px); left:0; right:auto; padding:20px 20px}
-  .ch-card.right{left:0; right:auto; border-right:1px solid rgba(30,122,70,.22); border-left:4px solid var(--green)}
+  .ch-card, .ch-card.right{
+    width:100%; max-width:100%; left:0; right:auto;
+    padding:20px 18px;
+    border:1px solid rgba(30,122,70,.22); border-left:4px solid var(--green);
+  }
   .ch-card h3{font-size:19px}
   .ch-card p{font-size:13.5px}
+  #journey h2{font-size:clamp(27px,7.5vw,38px)}
   #journey .head{padding-top:96px}
   #journey .head p{font-size:14px}
-  .chapter-deck{height:min(340px,40vh)}
+  .chapter-deck{height:min(340px,42vh)}
 }
 
 /* ---- portrait tablets (iPad vertical) ---- */
@@ -740,7 +744,7 @@ function computeLayout(){
     L.minarY = L.phone ? .9 : .45;
     L.minarS = Math.min(L.phone ? .62 : .8, (vw*.44)/3.2, (vh*.44)/7.6);
     L.mapX = 0;  L.mapY = L.phone ? 1.2 : .85;
-    L.mapS = Math.min(L.phone ? .62 : .82, (vw*.46)/3.8, (vh*.34)/3.6);
+    L.mapS = Math.min(L.phone ? .62 : .82, (vw*.48)/5.0, (vh*.34)/3.6); // 5.0 = rotated diagonal extent
     L.artX = 0;  L.artY = L.phone ? 2.3 : 2.8;
     L.paperX = 0;
   } else {
@@ -1002,18 +1006,29 @@ function setupScroll(){
     }
   });
 
-  const SMALL = window.innerWidth < 768; // phones: vertical card motion, nothing leaves the screen
+  const SMALL = window.innerWidth < 768; // phones: vertical-only card motion, x is never touched
+  if(SMALL) gsap.set(cards, {x:0});
   cards.forEach((card,i)=>{
     const at = i;             // each card owns 1 unit of timeline
-    const fromX = SMALL ? 0 : (card.classList.contains('right') ? 70 : -70);
-    const fromY = SMALL ? 46 : 0;
-    jtl.fromTo(card, {x:fromX, y:fromY, autoAlpha:0, visibility:'hidden'},
-      {x:0, y:0, autoAlpha:1, visibility:'visible', duration:.32, ease:'power3.out',
-       onStart:()=> showArt(card.dataset.art, card.classList.contains('right') ? -1 : 1)}, at);
-    if(i < N-1){
-      jtl.to(card, {x:SMALL ? 0 : -fromX*.5, y:SMALL ? -38 : 0, autoAlpha:0, duration:.3, ease:'power2.in'}, at + .68);
+    if(SMALL){
+      jtl.fromTo(card, {y:46, autoAlpha:0, visibility:'hidden'},
+        {y:0, autoAlpha:1, visibility:'visible', duration:.32, ease:'power3.out',
+         onStart:()=> showArt(card.dataset.art, card.classList.contains('right') ? -1 : 1)}, at);
+      if(i < N-1){
+        jtl.to(card, {y:-38, autoAlpha:0, duration:.3, ease:'power2.in'}, at + .68);
+      } else {
+        jtl.to(card, {autoAlpha:1, duration:.3}, at + .68); // last card holds
+      }
     } else {
-      jtl.to(card, {autoAlpha:1, duration:.3}, at + .68); // last card holds
+      const fromX = card.classList.contains('right') ? 70 : -70;
+      jtl.fromTo(card, {x:fromX, autoAlpha:0, visibility:'hidden'},
+        {x:0, autoAlpha:1, visibility:'visible', duration:.32, ease:'power3.out',
+         onStart:()=> showArt(card.dataset.art, card.classList.contains('right') ? -1 : 1)}, at);
+      if(i < N-1){
+        jtl.to(card, {x:-fromX*.5, autoAlpha:0, duration:.3, ease:'power2.in'}, at + .68);
+      } else {
+        jtl.to(card, {autoAlpha:1, duration:.3}, at + .68); // last card holds
+      }
     }
   });
   jtl.totalDuration(N); // normalize
