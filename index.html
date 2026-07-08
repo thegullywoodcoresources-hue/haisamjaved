@@ -145,6 +145,7 @@ h1,h2,h3{font-family:var(--display);color:var(--forest);font-weight:600;line-hei
   .checker-cta{flex-direction:column; align-items:flex-start}
   .checker-cta-btn{width:100%; justify-content:center}
 }
+
 .scroll-cue{position:absolute;left:50%;bottom:26px;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:10px;z-index:3}
 .scroll-cue span{font-size:10px;letter-spacing:.28em;text-transform:uppercase;color:var(--green);font-weight:700}
 .scroll-cue i{width:1.5px;height:46px;background:linear-gradient(var(--green),transparent);display:block;animation:cue 1.8s ease-in-out infinite;transform-origin:top}
@@ -224,6 +225,10 @@ h1,h2,h3{font-family:var(--display);color:var(--forest);font-weight:600;line-hei
 #materials .lead{margin-top:16px;font-size:15.5px;line-height:1.7;color:#43504a;max-width:52ch}
 .mat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(18px,2.6vw,30px);margin-top:clamp(30px,4vw,50px)}
 .mat-grid:empty{margin-top:0}
+#materials .res-btn{display:inline-flex;align-items:center;gap:10px;margin-top:30px;background:var(--green);color:#fff;font-weight:700;font-size:14.5px;letter-spacing:.04em;text-decoration:none;padding:17px 32px;border-radius:2px;box-shadow:0 14px 30px -14px rgba(14,77,44,.45);transition:background .3s,transform .3s}
+#materials .res-btn:hover{background:var(--forest);transform:translateY(-3px)}
+#materials .res-btn span{transition:transform .3s}
+#materials .res-btn:hover span{transform:translateX(5px)}
 @media(max-width:880px){ .mat-grid{grid-template-columns:1fr} }
 
 /* ---- results ---- */
@@ -282,6 +287,17 @@ h1,h2,h3{font-family:var(--display);color:var(--forest);font-weight:600;line-hei
 
 .w-em{font-style:italic;font-weight:500;color:var(--green)}
 #contact .w-em{color:var(--jade)}
+
+/* ---- phones: chapter cards always fully on screen ---- */
+@media (max-width:767px){
+  .ch-card{width:calc(100vw - 44px); left:0; right:auto; padding:20px 20px}
+  .ch-card.right{left:0; right:auto; border-right:1px solid rgba(30,122,70,.22); border-left:4px solid var(--green)}
+  .ch-card h3{font-size:19px}
+  .ch-card p{font-size:13.5px}
+  #journey .head{padding-top:96px}
+  #journey .head p{font-size:14px}
+  .chapter-deck{height:min(340px,40vh)}
+}
 
 /* ---- portrait tablets (iPad vertical) ---- */
 @media (min-width:768px) and (max-width:1180px) and (orientation:portrait){
@@ -342,7 +358,6 @@ h1,h2,h3{font-family:var(--display);color:var(--forest);font-weight:600;line-hei
         <div><b>2</b><span>Papers · Hist &amp; Geo</span></div>
         <div><b>Karachi</b><span>&amp; Online</span></div>
       </div>
-
       <a href="https://olevel-grader.lovable.app" target="_blank" rel="noopener" class="checker-cta">
         <div class="checker-cta-left">
           <span class="checker-cta-eyebrow">
@@ -434,12 +449,7 @@ h1,h2,h3{font-family:var(--display);color:var(--forest);font-weight:600;line-hei
   <div class="wrap">
     <span class="eyebrow reveal-eyebrow">Notes · Past Papers · Workbooks</span>
     <h2 class="split-lines">Resources.</h2>
-    <p class="lead fade-up">Geography notes, solved past papers and workbooks — this shelf is being stocked. Everything a 2059 student needs will live here, free to download.</p>
-    <div class="mat-grid" id="materialsGrid">
-      <!-- RESOURCE CARDS GO HERE — e.g.
-      <a class="res-card" href="LINK"><span class="rk">Geography Notes</span><h3>Title</h3><p>Description</p><span class="go">Download</span></a>
-      -->
-    </div>
+    <a class="res-btn fade-up" href="https://classmate.learn360lms.com/product/details/oligcse-pakistan-studies-by-haisam-javed-20737" target="_blank" rel="noopener">Get Free Resources <span aria-hidden="true">→</span></a>
   </div>
 </section>
 
@@ -992,14 +1002,16 @@ function setupScroll(){
     }
   });
 
+  const SMALL = window.innerWidth < 768; // phones: vertical card motion, nothing leaves the screen
   cards.forEach((card,i)=>{
     const at = i;             // each card owns 1 unit of timeline
-    const fromX = card.classList.contains('right') ? 70 : -70;
-    jtl.fromTo(card, {x:fromX, autoAlpha:0, visibility:'hidden'},
-      {x:0, autoAlpha:1, visibility:'visible', duration:.32, ease:'power3.out',
+    const fromX = SMALL ? 0 : (card.classList.contains('right') ? 70 : -70);
+    const fromY = SMALL ? 46 : 0;
+    jtl.fromTo(card, {x:fromX, y:fromY, autoAlpha:0, visibility:'hidden'},
+      {x:0, y:0, autoAlpha:1, visibility:'visible', duration:.32, ease:'power3.out',
        onStart:()=> showArt(card.dataset.art, card.classList.contains('right') ? -1 : 1)}, at);
     if(i < N-1){
-      jtl.to(card, {x:-fromX*.5, autoAlpha:0, duration:.3, ease:'power2.in'}, at + .68);
+      jtl.to(card, {x:SMALL ? 0 : -fromX*.5, y:SMALL ? -38 : 0, autoAlpha:0, duration:.3, ease:'power2.in'}, at + .68);
     } else {
       jtl.to(card, {autoAlpha:1, duration:.3}, at + .68); // last card holds
     }
