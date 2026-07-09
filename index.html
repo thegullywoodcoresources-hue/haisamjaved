@@ -288,15 +288,22 @@ h1,h2,h3{font-family:var(--display);color:var(--forest);font-weight:600;line-hei
 .w-em{font-style:italic;font-weight:500;color:var(--green)}
 #contact .w-em{color:var(--jade)}
 
-/* ---- phones: chapter cards always fully on screen ---- */
+/* ---- phones: chapter cards always fully on screen (v4) ---- */
 @media (max-width:767px){
   .ch-card, .ch-card.right{
-    width:100%; max-width:100%; left:0; right:auto;
-    padding:20px 18px;
-    border:1px solid rgba(30,122,70,.22); border-left:4px solid var(--green);
+    position:absolute !important; top:0 !important;
+    left:0 !important; right:0 !important;           /* stretch between both edges */
+    width:auto !important; max-width:none !important; /* width comes from the stretch, nothing else */
+    box-sizing:border-box !important;
+    background:#ffffff !important;                    /* solid white — text always covered */
+    padding:20px 18px !important;
+    border:1px solid rgba(30,122,70,.22) !important;
+    border-left:4px solid var(--green) !important;
+    box-shadow:0 18px 50px -22px rgba(14,77,44,.25) !important;
   }
-  .ch-card h3{font-size:19px}
-  .ch-card p{font-size:13.5px}
+  .ch-card .num{font-size:10.5px !important}
+  .ch-card h3{font-size:19px !important; line-height:1.25 !important}
+  .ch-card p{font-size:13.5px !important; line-height:1.6 !important}
   #journey h2{font-size:clamp(27px,7.5vw,38px)}
   #journey .head{padding-top:96px}
   #journey .head p{font-size:14px}
@@ -328,6 +335,7 @@ h1,h2,h3{font-family:var(--display);color:var(--forest);font-weight:600;line-hei
 </style>
 </head>
 <body class="contour-bg">
+<!-- HJ-SITE VERSION 5 : mobile card fix (inline hardened) -->
 
 <div id="loader"><div class="bar"><i></i></div><span>Pakistan Studies</span></div>
 
@@ -534,6 +542,7 @@ h1,h2,h3{font-family:var(--display);color:var(--forest);font-weight:600;line-hei
 <script>
 (function(){
 "use strict";
+console.log("HJ site v5 — mobile fix active");
 gsap.registerPlugin(ScrollTrigger);
 
 const REDUCED = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -1007,7 +1016,25 @@ function setupScroll(){
   });
 
   const SMALL = window.innerWidth < 768; // phones: vertical-only card motion, x is never touched
-  if(SMALL) gsap.set(cards, {x:0});
+  if(SMALL){
+    gsap.set(cards, {x:0});
+    // Belt & braces: write layout straight onto each card as inline !important styles.
+    // No stylesheet, cache, or leftover rule can override these.
+    cards.forEach(c=>{
+      const st = c.style;
+      st.setProperty('position','absolute','important');
+      st.setProperty('top','0','important');
+      st.setProperty('left','0','important');
+      st.setProperty('right','0','important');
+      st.setProperty('width','auto','important');
+      st.setProperty('max-width','none','important');
+      st.setProperty('box-sizing','border-box','important');
+      st.setProperty('background','#ffffff','important');
+      st.setProperty('padding','20px 18px','important');
+      st.setProperty('border','1px solid rgba(30,122,70,.22)','important');
+      st.setProperty('border-left','4px solid #1E7A46','important');
+    });
+  }
   cards.forEach((card,i)=>{
     const at = i;             // each card owns 1 unit of timeline
     if(SMALL){
